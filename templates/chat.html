@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+{% block titulo %}Chat · MesseChat{% endblock %}
+{% block contenido %}
+
+<div class="pantalla-fija">
+<div class="barra-superior">
+  <span class="marca"><i class="bi bi-chat-heart-fill"></i> MesseChat</span>
+  <nav>
+    <a class="btn-icono" href="{{ url_for('main.inicio', abrir='solicitudes') }}" title="Solicitudes" style="position:relative;">
+      <i class="bi bi-bell"></i>
+      {% if solicitudes_pendientes %}<span class="badge-contador" style="position:absolute;top:-4px;right:-4px;">{{ solicitudes_pendientes }}</span>{% endif %}
+    </a>
+    <a href="{{ url_for('main.perfil') }}" title="Mi perfil">
+      {% if current_user.foto and current_user.foto != 'default.png' %}
+      <img src="{{ url_for('static', filename=current_user.foto) }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+      {% else %}
+      <span style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:600;">{{ current_user.usuario_publico[:2]|upper }}</span>
+      {% endif %}
+    </a>
+  </nav>
+</div>
+
+<div class="app-layout altura-completa">
+  {% set activo = 'chats' %}
+  {% include "_sidebar.html" %}
+
+  <div class="layout-chat" style="flex:1;">
+  <div class="sidebar-contactos">
+    <div style="padding:14px;border-bottom:1px solid var(--color-borde);">
+      <input type="text" id="buscar-contacto" placeholder="Buscar en tus chats...">
+    </div>
+    <div id="lista-contactos">
+      {% for c in chats %}
+      {% set otro = c.otro_usuario(current_user.id) %}
+      <a class="contacto-item {% if chat_activo and chat_activo.id == c.id %}activo{% endif %}"
+         href="{{ url_for('chat.ver_chat', chat_id=c.id) }}" data-nombre="{{ otro.usuario_publico|lower }}">
+        {% if otro.foto and otro.foto != 'default.png' %}
+        <img class="foto" src="{{ url_for('static', filename=otro.foto) }}">
+        {% else %}
+        <div class="foto">{{ otro.usuario_publico[:2]|upper }}</div>
+        {% endif %}
+        <span>{{ otro.usuario_publico }}</span>
+      </a>
+      {% else %}
+      <p style="padding:16px;color:var(--color-texto-suave);font-size:.85em;">
+        <i class="bi bi-inboxes"></i> Aún no tienes chats. Acepta una solicitud desde Inicio.
+      </p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="conversacion">
+    {% if chat_activo %}
+    {% set otro = chat_activo.otro_usuario(current_user.id) %}
+    <div class="barra-superior" style="padding:12px 20px;">
+      <span>{{ otro.usuario_publico }}</span>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span id="estado-contacto" data-usuario="{{ otro.id }}" style="font-size:.8em;">{{ otro_estado or '' }}</span>
+        <div class="menu-opciones">
+          <button class="btn-icono" onclick="toggleMenuChat(event)"><i class="bi bi-three-dots-vertical"></i></button>
+          <div class="dropdown" id="menu-chat">
+            <button onclick="verPerfilContacto({{ otro.id }})"><i class="bi bi-person-circle"></i> Ver perfil</button>
+            <button onclick="vaciarChat({{ chat_activo.id }})"><i class="bi bi-trash3"></i> Vaciar chat</button>
+            <button onclick="bloquearContacto({{ otro.id }})" class="peligro"><i class="bi bi-slash-circle"></i> Bloquear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mensajes" id="mensajes">
+      {% for m in mensajes %}
+      {% set seguido = loop.index0 > 0 and mensajes[loop.index0-1].emisor_id == m.emisor_id %}
+      <div class="fila-burbuja {{ 'propia' if m.emisor_id == current_user.id else 'ajena' }} {{ 'seguido' if seguido }}" data-id="{{ m.id }}" data-emisor="{{ m.emisor_id }}">
+        <button class="btn-opciones-msg" onclick="toggleMenuMsg(event, {{ m.id }})"><i class="bi bi-chevron-up"></i></button>
+        <div class="dropdown dropdown-msg" id="menu-msg-{{ m.id }}">
+          <button onclick="copiarMensaje({{ m.id }})"><i class="bi bi-clipboard"></i> Copiar</button>
+          <button onclick="borrarMensaje({{ m.id }}, 'mio')"><i class="bi bi-eye-slash"></i> Borrar para mí</button>
+          {% if m.emisor_id == current_user.id %}
+          <button onclick="borrarMensaje({{ m.id }}, 'todos')" class="peligro"><i class="bi bi-trash3"></i> Borrar para todos</button>
+          {% endif %}
+        </div>
+        <div class="burbuja">
+          {% if m.eliminado_para_todos %}
+          <em style="opacity:.7;">Mensaje eliminado</em>
+          {% else %}
+          {% if m.imagen %}<img src="{{ m.imagen }}" alt="adjunto">{% endif %}
+          {% if m.contenido %}<span class="texto-msg">{{ m.contenido }}</span>{% endif %}
+          {% endif %}
+          <span class="hora">{{ m.fecha_envio.strftime('%H:%M') }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="caja-envio">
+      <label class="adjuntar" for="input-imagen"><i class="bi bi-paperclip"></i></label>
+      <input type="file" id="input-imagen" accept="image/*" style="display:none;" onchange="adjuntarImagen(event)">
+      <input type="text" id="input-mensaje" placeholder="Escribe un mensaje...">
+      <button class="enviar" onclick="enviarMensaje()"><i class="bi bi-send-fill"></i></button>
+    </div>
+    {% else %}
+    <div class="pantalla-centrada" style="height:100%;color:var(--color-texto-suave);">
+      Selecciona un chat para empezar a conversar.
+    </div>
+    {% endif %}
+  </div>
+  </div>
+</div>
+</div>
+
+<div class="modal-fondo" id="modal-perfil" onclick="if(event.target===this) cerrarModalPerfil()">
+  <div class="modal-caja" id="modal-perfil-contenido"></div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('buscar-contacto')?.addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll('.contacto-item').forEach(el => {
+    el.style.display = el.dataset.nombre.includes(q) ? 'flex' : 'none';
+  });
+});
+
+// ---------- Menús desplegables ----------
+function cerrarTodosLosMenus() {
+  document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('abierto'));
+}
+document.addEventListener('click', cerrarTodosLosMenus);
+
+function toggleMenuChat(e) {
+  e.stopPropagation();
+  cerrarTodosLosMenus();
+  document.getElementById('menu-chat').classList.toggle('abierto');
+}
+
+function toggleMenuMsg(e, id) {
+  e.stopPropagation();
+  const estaAbierto = document.getElementById('menu-msg-' + id).classList.contains('abierto');
+  cerrarTodosLosMenus();
+  if (!estaAbierto) document.getElementById('menu-msg-' + id).classList.add('abierto');
+}
+
+// ---------- Acciones del menú de 3 puntos ----------
+async function verPerfilContacto(id) {
+  const res = await fetch(`/api/usuario/${id}`);
+  const u = await res.json();
+  const foto = (u.foto && u.foto !== 'default.png')
+    ? `<img src="/static/${u.foto}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`
+    : `<div style="width:80px;height:80px;border-radius:50%;background:var(--color-primario);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.6em;font-weight:600;">${u.usuario_publico.slice(0,2).toUpperCase()}</div>`;
+  document.getElementById('modal-perfil-contenido').innerHTML = `
+    <div style="text-align:center;">
+      ${foto}
+      <h2 style="margin-top:10px;">${u.usuario_publico}</h2>
+      ${u.pais ? `<p style="color:var(--color-texto-suave);">${u.pais}</p>` : ''}
+    </div>
+    <p style="margin-top:14px;"><i class="bi bi-card-text"></i> ${u.descripcion || 'Sin descripción'}</p>
+    ${u.intereses ? `<p style="margin-top:8px;"><i class="bi bi-stars"></i> ${u.intereses}</p>` : ''}
+    <button class="btn btn-secundario" style="width:100%;margin-top:16px;" onclick="cerrarModalPerfil()">Cerrar</button>
+  `;
+  document.getElementById('modal-perfil').classList.add('abierto');
+}
+function cerrarModalPerfil() {
+  document.getElementById('modal-perfil').classList.remove('abierto');
+}
+
+async function vaciarChat(chatId) {
+  if (!confirm('¿Vaciar todos los mensajes de este chat? Esto no se puede deshacer.')) return;
+  const res = await fetch(`/api/chat/${chatId}/vaciar`, { method: 'POST' });
+  if ((await res.json()).ok) location.reload();
+}
+
+async function bloquearContacto(id) {
+  if (!confirm('¿Bloquear a este usuario? Ya no podrán chatear ni enviarse solicitudes.')) return;
+  const res = await fetch(`/api/bloquear/${id}`, { method: 'POST' });
+  if ((await res.json()).ok) window.location.href = '/inicio';
+}
+
+// ---------- Acciones por mensaje ----------
+function copiarMensaje(id) {
+  const fila = document.querySelector(`.fila-burbuja[data-id="${id}"] .texto-msg`);
+  if (fila) navigator.clipboard.writeText(fila.textContent);
+  cerrarTodosLosMenus();
+}
+
+async function borrarMensaje(id, alcance) {
+  const res = await fetch(`/api/mensaje/${id}/eliminar/${alcance}`, { method: 'POST' });
+  const data = await res.json();
+  if (data.ok) {
+    const fila = document.querySelector(`.fila-burbuja[data-id="${id}"]`);
+    if (alcance === 'mio') {
+      fila.remove();
+    } else {
+      fila.querySelector('.burbuja').innerHTML = '<em style="opacity:.7;">Mensaje eliminado</em>';
+    }
+  } else if (data.mensaje) {
+    alert(data.mensaje);
+  }
+  cerrarTodosLosMenus();
+}
+
+{% if chat_activo %}
+const socket = io();
+const chatId = {{ chat_activo.id }};
+const miId = {{ current_user.id }};
+
+socket.on('connect', () => {
+  console.log('✅ Socket conectado, id:', socket.id);
+  socket.emit('unirse_chat', { chat_id: chatId });
+  socket.emit('unirse_personal');
+});
+socket.on('connect_error', (err) => console.error('❌ Error de conexión Socket.IO:', err));
+socket.on('disconnect', (motivo) => console.warn('⚠️ Socket desconectado:', motivo));
+
+socket.on('estado_usuario', (data) => {
+  const span = document.getElementById('estado-contacto');
+  if (span && parseInt(span.dataset.usuario) === data.usuario_id) {
+    span.textContent = data.estado || '';
+  }
+});
+
+const cajaMensajes = document.getElementById('mensajes');
+cajaMensajes.scrollTop = cajaMensajes.scrollHeight;
+
+socket.on('nuevo_mensaje', (data) => {
+  console.log('📩 Mensaje recibido:', data);
+  if (data.chat_id !== chatId) return;
+  const esPropia = data.emisor_id === miId;
+  const ultimaFila = cajaMensajes.lastElementChild;
+  const seguido = ultimaFila && parseInt(ultimaFila.dataset.emisor) === data.emisor_id;
+  const fila = document.createElement('div');
+  fila.className = 'fila-burbuja ' + (esPropia ? 'propia' : 'ajena') + (seguido ? ' seguido' : '');
+  fila.dataset.id = data.msg_id;
+  fila.dataset.emisor = data.emisor_id;
+  const img = data.imagen ? `<img src="${data.imagen}">` : '';
+  fila.innerHTML = `
+    <button class="btn-opciones-msg" onclick="toggleMenuMsg(event, ${data.msg_id})"><i class="bi bi-chevron-up"></i></button>
+    <div class="dropdown dropdown-msg" id="menu-msg-${data.msg_id}">
+      <button onclick="copiarMensaje(${data.msg_id})"><i class="bi bi-clipboard"></i> Copiar</button>
+      <button onclick="borrarMensaje(${data.msg_id}, 'mio')"><i class="bi bi-eye-slash"></i> Borrar para mí</button>
+      ${esPropia ? `<button onclick="borrarMensaje(${data.msg_id}, 'todos')" class="peligro"><i class="bi bi-trash3"></i> Borrar para todos</button>` : ''}
+    </div>
+    <div class="burbuja">${img}${data.contenido ? `<span class="texto-msg">${data.contenido}</span>` : ''}<span class="hora">${data.fecha_envio}</span></div>`;
+  cajaMensajes.appendChild(fila);
+  cajaMensajes.scrollTop = cajaMensajes.scrollHeight;
+});
+
+socket.on('mensaje_eliminado', (data) => {
+  const fila = document.querySelector(`.fila-burbuja[data-id="${data.msg_id}"]`);
+  if (fila) fila.querySelector('.burbuja').innerHTML = '<em style="opacity:.7;">Mensaje eliminado</em>';
+});
+
+let imagenPendiente = null;
+
+function adjuntarImagen(event) {
+  const archivo = event.target.files[0];
+  if (!archivo) return;
+  const lector = new FileReader();
+  lector.onload = () => {
+    imagenPendiente = lector.result;
+    document.getElementById('input-mensaje').placeholder = '📎 Imagen lista, escribe algo o solo envía...';
+  };
+  lector.readAsDataURL(archivo);
+}
+
+function enviarMensaje() {
+  const input = document.getElementById('input-mensaje');
+  if (!input.value.trim() && !imagenPendiente) return;
+  console.log('📤 Enviando mensaje al chat', chatId, 'conectado:', socket.connected);
+  socket.emit('enviar_mensaje', { chat_id: chatId, contenido: input.value.trim(), imagen: imagenPendiente });
+  input.value = '';
+  imagenPendiente = null;
+  input.placeholder = 'Escribe un mensaje...';
+}
+document.getElementById('input-mensaje')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') enviarMensaje();
+});
+{% endif %}
+</script>
+{% endblock %}

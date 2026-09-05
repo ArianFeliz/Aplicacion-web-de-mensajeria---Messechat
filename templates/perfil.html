@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block titulo %}Mi perfil · MesseChat{% endblock %}
+{% block contenido %}
+
+<div class="barra-superior">
+  <span class="marca"><i class="bi bi-chat-heart-fill"></i> MesseChat</span>
+  <nav>
+    <a class="btn-icono" href="{{ url_for('main.inicio', abrir='solicitudes') }}" title="Solicitudes" style="position:relative;">
+      <i class="bi bi-bell"></i>
+      {% if solicitudes_pendientes %}<span class="badge-contador" style="position:absolute;top:-4px;right:-4px;">{{ solicitudes_pendientes }}</span>{% endif %}
+    </a>
+  </nav>
+</div>
+
+<div class="app-layout">
+  {% set activo = 'perfil' %}
+  {% include "_sidebar.html" %}
+
+  <div class="contenido-principal">
+<form class="opciones-config" method="POST" enctype="multipart/form-data">
+
+  <div class="opcion-config" style="text-align:center;">
+    <label for="input-foto" style="cursor:pointer;display:inline-block;position:relative;">
+      {% if current_user.foto and current_user.foto != 'default.png' %}
+        <img id="preview-foto" src="{{ url_for('static', filename=current_user.foto) }}"
+             style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--color-primario);">
+      {% else %}
+        <div id="preview-foto-vacio" style="width:96px;height:96px;border-radius:50%;background:var(--color-primario);
+             color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.6em;font-weight:600;">
+          {{ current_user.usuario_publico[:2]|upper }}
+        </div>
+      {% endif %}
+      <span style="position:absolute;bottom:0;right:0;background:var(--color-primario);color:#fff;
+            border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+            border:2px solid #fff;">
+        <i class="bi bi-camera-fill" style="font-size:.8em;"></i>
+      </span>
+    </label>
+    <input type="file" name="foto" id="input-foto" accept="image/*" style="display:none;" onchange="previsualizarFoto(event)">
+    <p style="margin-top:8px;font-weight:500;">{{ current_user.usuario_publico }}</p>
+  </div>
+
+  <div class="opcion-config">
+    <h3><i class="bi bi-card-text"></i> Descripción</h3>
+    <textarea name="descripcion" rows="3" maxlength="300" placeholder="Cuéntanos algo sobre ti...">{{ current_user.descripcion or '' }}</textarea>
+  </div>
+
+  <div class="opcion-config">
+    <h3><i class="bi bi-stars"></i> Gustos e intereses</h3>
+    <input type="text" name="intereses" value="{{ current_user.intereses or '' }}" placeholder="música, videojuegos, cine...">
+  </div>
+
+  <div class="opcion-config">
+    <h3><i class="bi bi-flag"></i> País</h3>
+    <select name="pais">
+      <option value="">Selecciona tu país</option>
+      {% for p in paises %}
+      <option value="{{ p }}" {{ 'selected' if current_user.pais == p }}>{{ p }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <button type="submit" class="btn"><i class="bi bi-check-lg"></i> Guardar cambios</button>
+</form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function previsualizarFoto(event) {
+  const archivo = event.target.files[0];
+  if (!archivo) return;
+  const url = URL.createObjectURL(archivo);
+  const img = document.getElementById('preview-foto');
+  if (img) {
+    img.src = url;
+  } else {
+    const vacio = document.getElementById('preview-foto-vacio');
+    vacio.outerHTML = `<img id="preview-foto" src="${url}" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--color-primario);">`;
+  }
+}
+</script>
+{% endblock %}

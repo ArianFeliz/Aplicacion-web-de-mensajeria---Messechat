@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block titulo %}Bloqueados · MesseChat{% endblock %}
+{% block contenido %}
+
+<div class="barra-superior">
+  <span class="marca"><i class="bi bi-chat-heart-fill"></i> MesseChat</span>
+  <nav>
+    <a class="btn-icono" href="{{ url_for('main.inicio', abrir='solicitudes') }}" title="Solicitudes" style="position:relative;">
+      <i class="bi bi-bell"></i>
+      {% if solicitudes_pendientes %}<span class="badge-contador" style="position:absolute;top:-4px;right:-4px;">{{ solicitudes_pendientes }}</span>{% endif %}
+    </a>
+  </nav>
+</div>
+
+<div class="app-layout">
+  {% set activo = 'bloqueados' %}
+  {% include "_sidebar.html" %}
+
+  <div class="contenido-principal">
+<div style="max-width:480px;margin:24px auto;">
+  <h2 style="margin-bottom:14px;"><i class="bi bi-slash-circle"></i> Usuarios bloqueados</h2>
+
+  {% if not bloqueos %}
+  <p style="color:var(--color-texto-suave);font-size:.9em;">No has bloqueado a nadie.</p>
+  {% endif %}
+
+  {% for b in bloqueos %}
+  <div class="resultado-usuario" style="background:var(--superficie);border-radius:12px;margin-bottom:8px;" data-id="{{ b.bloqueado_id }}">
+    {% if b.bloqueado.foto and b.bloqueado.foto != 'default.png' %}
+    <img class="foto" src="{{ url_for('static', filename=b.bloqueado.foto) }}">
+    {% else %}
+    <div class="foto">{{ b.bloqueado.usuario_publico[:2]|upper }}</div>
+    {% endif %}
+    <div class="nombre">{{ b.bloqueado.usuario_publico }}</div>
+    <button class="btn btn-secundario" onclick="desbloquear({{ b.bloqueado_id }}, this)"><i class="bi bi-unlock"></i> Desbloquear</button>
+  </div>
+  {% endfor %}
+</div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function desbloquear(id, btn) {
+  const res = await fetch(`/api/desbloquear/${id}`, { method: 'POST' });
+  const data = await res.json();
+  if (data.ok) btn.closest('.resultado-usuario').remove();
+}
+</script>
+{% endblock %}

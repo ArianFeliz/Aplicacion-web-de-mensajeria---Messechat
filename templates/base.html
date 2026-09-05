@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block titulo %}MesseChat{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=4">
+  {% if current_user.is_authenticated and current_user.preferencia %}
+  <style>
+    :root {
+      --color-primario: {{ current_user.preferencia.color_primario }};
+      --color-fondo: {{ current_user.preferencia.color_fondo }};
+      --font-family: '{{ current_user.preferencia.tipo_letra }}', sans-serif;
+    }
+  </style>
+  {% endif %}
+</head>
+<body {% if current_user.is_authenticated and current_user.preferencia %}data-tamano="{{ current_user.preferencia.tamano_letra }}"{% endif %}>
+  {% with mensajes = get_flashed_messages() %}
+    {% if mensajes %}
+      <div class="flash" style="max-width:380px;margin:14px auto 0;">{{ mensajes[0] }}</div>
+    {% endif %}
+  {% endwith %}
+  {% block contenido %}{% endblock %}
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

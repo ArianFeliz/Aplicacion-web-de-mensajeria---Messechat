@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block titulo %}MesseChat{% endblock %}
+{% block contenido %}
+<div class="pantalla-centrada">
+  <div class="tarjeta" style="text-align:center;">
+    <h1>MesseChat</h1>
+    <p class="subtitulo">Mensajería en tiempo real</p>
+    <a class="btn" style="display:block;margin-bottom:12px;text-decoration:none;" href="{{ url_for('auth.registro_credenciales') }}">Crear cuenta</a>
+    <a class="btn btn-secundario" style="display:block;text-decoration:none;" href="{{ url_for('auth.login') }}">Logearse</a>
+  </div>
+</div>
+{% endblock %}

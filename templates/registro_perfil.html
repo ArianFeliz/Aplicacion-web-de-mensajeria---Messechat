@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}Tu perfil · MesseChat{% endblock %}
+{% block contenido %}
+<div class="pantalla-centrada">
+  <form class="tarjeta" method="POST">
+    <h1>Describe tu perfil</h1>
+    <p class="subtitulo">Paso 3 de 4 · Una breve bio (opcional)</p>
+    <div class="campo">
+      <textarea name="descripcion" rows="4" maxlength="300" placeholder="Cuéntanos algo sobre ti..."></textarea>
+    </div>
+    <button class="btn" style="width:100%;" type="submit">Continuar</button>
+  </form>
+</div>
+{% endblock %}

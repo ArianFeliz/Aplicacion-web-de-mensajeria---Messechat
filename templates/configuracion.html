@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block titulo %}Configuración · MesseChat{% endblock %}
+{% block contenido %}
+
+<div class="barra-superior">
+  <span class="marca"><i class="bi bi-chat-heart-fill"></i> MesseChat</span>
+  <nav>
+    <a class="btn-icono" href="{{ url_for('main.inicio', abrir='solicitudes') }}" title="Solicitudes" style="position:relative;">
+      <i class="bi bi-bell"></i>
+      {% if solicitudes_pendientes %}<span class="badge-contador" style="position:absolute;top:-4px;right:-4px;">{{ solicitudes_pendientes }}</span>{% endif %}
+    </a>
+  </nav>
+</div>
+
+<div class="app-layout">
+  {% set activo = 'configuracion' %}
+  {% include "_sidebar.html" %}
+
+  <div class="contenido-principal">
+<form class="opciones-config" method="POST" id="form-config">
+
+  <div class="opcion-config">
+    <h3>Paleta de colores</h3>
+    <div class="muestra-color">
+      <label>Primario</label>
+      <input type="color" name="color_primario" id="color_primario" value="{{ pref.color_primario }}" oninput="previsualizar()">
+      <label>Fondo</label>
+      <input type="color" name="color_fondo" id="color_fondo" value="{{ pref.color_fondo }}" oninput="previsualizar()">
+    </div>
+  </div>
+
+  <div class="opcion-config">
+    <h3>Tamaño de letra</h3>
+    <select name="tamano_letra" id="tamano_letra" onchange="previsualizar()">
+      <option value="chico" {{ 'selected' if pref.tamano_letra == 'chico' }}>Chico</option>
+      <option value="mediano" {{ 'selected' if pref.tamano_letra == 'mediano' }}>Mediano</option>
+      <option value="grande" {{ 'selected' if pref.tamano_letra == 'grande' }}>Grande</option>
+    </select>
+  </div>
+
+  <div class="opcion-config">
+    <h3>Tipo de letra</h3>
+    <select name="tipo_letra" id="tipo_letra" onchange="previsualizar()">
+      <option {{ 'selected' if pref.tipo_letra == 'Poppins' }}>Poppins</option>
+      <option {{ 'selected' if pref.tipo_letra == 'Roboto' }}>Roboto</option>
+      <option {{ 'selected' if pref.tipo_letra == 'Georgia' }}>Georgia</option>
+      <option {{ 'selected' if pref.tipo_letra == 'Courier New' }}>Courier New</option>
+    </select>
+  </div>
+
+  <div class="opcion-config">
+    <h3><i class="bi bi-circle-fill" style="font-size:.6em;color:#1e9e4a;"></i> Estado de actividad</h3>
+    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:.9em;">
+      <input type="checkbox" name="mostrar_estado" {{ 'checked' if pref.mostrar_estado }} style="width:18px;height:18px;">
+      Mostrarles a los demás si estoy activo, inactivo o hace cuánto me conecté
+    </label>
+  </div>
+
+  <div style="display:flex;gap:10px;">
+    <button type="submit" class="btn" style="flex:1;"><i class="bi bi-check-lg"></i> Guardar cambios</button>
+    <a class="btn btn-secundario" style="flex:1;text-align:center;text-decoration:none;" href="{{ url_for('main.inicio') }}"><i class="bi bi-x-lg"></i> Cancelar</a>
+  </div>
+  <button type="button" class="btn btn-peligro" onclick="restablecer()"><i class="bi bi-arrow-counterclockwise"></i> Restablecer valores originales</button>
+</form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function previsualizar() {
+  document.documentElement.style.setProperty('--color-primario', document.getElementById('color_primario').value);
+  document.documentElement.style.setProperty('--color-fondo', document.getElementById('color_fondo').value);
+  document.documentElement.style.setProperty('--font-family', "'" + document.getElementById('tipo_letra').value + "', sans-serif");
+  document.body.dataset.tamano = document.getElementById('tamano_letra').value;
+}
+
+async function restablecer() {
+  if (!confirm('¿Seguro que quieres restablecer los valores originales?')) return;
+  const res = await fetch('/api/configuracion/restablecer', { method: 'POST' });
+  if ((await res.json()).ok) location.reload();
+}
+</script>
+{% endblock %}

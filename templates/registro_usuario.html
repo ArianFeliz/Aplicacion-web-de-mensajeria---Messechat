@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titulo %}Elige tu usuario · MesseChat{% endblock %}
+{% block contenido %}
+<div class="pantalla-centrada">
+  <form class="tarjeta" method="POST">
+    <h1>Tu usuario público</h1>
+    <p class="subtitulo">Paso 2 de 4 · Debe ser único, otros te buscarán con él</p>
+    <div class="campo">
+      <label>Nombre de usuario</label>
+      <input type="text" name="usuario_publico" pattern="[a-zA-Z0-9_\.]{3,30}" required
+             placeholder="ej. ana_martinez">
+    </div>
+    <button class="btn" style="width:100%;" type="submit">Continuar</button>
+  </form>
+</div>
+{% endblock %}

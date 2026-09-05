@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}Iniciar sesión · MesseChat{% endblock %}
+{% block contenido %}
+<div class="pantalla-centrada">
+  <form class="tarjeta" method="POST">
+    <h1>Bienvenido de nuevo</h1>
+    <p class="subtitulo">Inicia sesión en MesseChat</p>
+    <div class="campo">
+      <label>Correo</label>
+      <input type="email" name="correo" required>
+    </div>
+    <div class="campo">
+      <label>Contraseña</label>
+      <input type="password" name="contrasena" required>
+    </div>
+    <button class="btn" style="width:100%;" type="submit">Entrar</button>
+    <div class="enlaces-alternos">
+      <a href="{{ url_for('auth.inicio_seccion') }}">Volver</a>
+      <a href="{{ url_for('auth.registro_credenciales') }}">Crear cuenta</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

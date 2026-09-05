@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% block titulo %}Inicio · MesseChat{% endblock %}
+{% block contenido %}
+
+<div class="barra-superior">
+  <span class="marca"><i class="bi bi-chat-heart-fill"></i> MesseChat</span>
+  <nav>
+    <button class="btn-icono" onclick="togglePanel()" title="Solicitudes" style="position:relative;">
+      <i class="bi bi-bell"></i>
+      <span id="badge-solicitudes" style="position:absolute;top:-4px;right:-4px;">
+        {% if solicitudes %}<span class="badge-contador">{{ solicitudes|length }}</span>{% endif %}
+      </span>
+    </button>
+    <a href="{{ url_for('main.perfil') }}" title="Mi perfil">
+      {% if current_user.foto and current_user.foto != 'default.png' %}
+      <img src="{{ url_for('static', filename=current_user.foto) }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+      {% else %}
+      <span style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:600;">{{ current_user.usuario_publico[:2]|upper }}</span>
+      {% endif %}
+    </a>
+  </nav>
+</div>
+
+<div class="app-layout">
+  {% set activo = 'inicio' %}
+  {% include "_sidebar.html" %}
+
+  <div class="contenido-principal">
+
+    <div class="bienvenida">
+      <div style="position:relative;">
+        {% if current_user.foto and current_user.foto != 'default.png' %}
+        <img class="foto-grande" src="{{ url_for('static', filename=current_user.foto) }}">
+        {% else %}
+        <div class="foto-grande">{{ current_user.usuario_publico[:2]|upper }}</div>
+        {% endif %}
+        <span class="punto-en-linea"></span>
+      </div>
+      <div style="flex:1;">
+        <h2>Hola, {{ current_user.usuario_publico }} <i class="bi bi-emoji-smile"></i></h2>
+        <p>{{ historial|length }} chat{{ 's' if historial|length != 1 else '' }} activo{{ 's' if historial|length != 1 else '' }} · Encuentra gente nueva abajo</p>
+      </div>
+      <div class="ilustracion-bienvenida">
+        <i class="bi bi-person-hearts"></i>
+        <i class="bi bi-chat-heart-fill icono-flotante"></i>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;max-width:620px;margin:8px auto 24px;align-items:center;">
+      <div class="buscador-general" style="margin:0;flex:1;">
+        <i class="bi bi-search"></i>
+        <input type="text" id="input-buscar" placeholder="Buscar usuario para enviarle una solicitud...">
+      </div>
+      <div class="menu-opciones">
+        <button class="btn btn-secundario" onclick="toggleFiltros(event)" style="white-space:nowrap;">
+          <i class="bi bi-sliders"></i> Filtros
+        </button>
+        <div class="dropdown" id="menu-filtros" style="left:auto;right:0;">
+          <button onclick="aplicarFiltro('todos')"><i class="bi bi-people"></i> Todos</button>
+          <button onclick="aplicarFiltro('en-linea')"><i class="bi bi-circle-fill" style="color:#1e9e4a;font-size:.6em;"></i> Solo en línea</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="resultados-busqueda" style="max-width:620px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;"></div>
+
+    <div id="contenido-relleno" style="max-width:620px;margin:0 auto;">
+
+      <div class="seccion-relleno">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h3 style="margin:0;"><i class="bi bi-clock-history"></i> Con quién has hablado</h3>
+          <a href="{{ url_for('chat.ver_chat') }}" style="font-size:.85em;color:var(--color-primario);text-decoration:none;">Ver todo <i class="bi bi-arrow-right"></i></a>
+        </div>
+        {% if historial %}
+          {% for h in historial %}
+          <a href="{{ url_for('chat.ver_chat', chat_id=h.chat_id) }}" class="resultado-usuario" style="text-decoration:none;color:inherit;">
+            <div style="position:relative;flex-shrink:0;">
+              {% if h.otro.foto and h.otro.foto != 'default.png' %}
+              <img class="foto" src="{{ url_for('static', filename=h.otro.foto) }}">
+              {% else %}
+              <div class="foto">{{ h.otro.usuario_publico[:2]|upper }}</div>
+              {% endif %}
+              <span class="punto-estado {{ 'activo' if h.estado == 'Activo' else '' }}"></span>
+            </div>
+            <div style="flex:1;">
+              <div class="nombre">{{ h.otro.usuario_publico }}</div>
+              <div class="estado-historial" data-usuario="{{ h.otro.id }}" style="font-size:.78em;color:var(--color-texto-suave);">{{ h.estado or '' }}</div>
+            </div>
+            <span style="font-size:.78em;color:var(--color-texto-suave);white-space:nowrap;">
+              {% if h.no_leidos > 0 %}
+              <span class="badge-contador" style="background:var(--color-primario);"><i class="bi bi-chat-dots-fill"></i> {{ h.no_leidos }}</span>
+              {% endif %}
+            </span>
+          </a>
+          {% endfor %}
+        {% else %}
+        <p style="color:var(--color-texto-suave);font-size:.9em;">Aún no has hablado con nadie. ¡Busca a alguien arriba!</p>
+        {% endif %}
+      </div>
+
+      {% if recomendados %}
+      <div class="seccion-relleno">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h3 style="margin:0;"><i class="bi bi-people"></i> Personas recomendadas</h3>
+          <a href="#" onclick="event.preventDefault(); document.getElementById('carrusel-recomendados').scrollBy({left:200, behavior:'smooth'})" style="font-size:.85em;color:var(--color-primario);text-decoration:none;">Ver más <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="carrusel-recomendados" id="carrusel-recomendados">
+          {% for r in recomendados %}
+          <div class="tarjeta-recomendado" data-usuario="{{ r.usuario.id }}" data-en-linea="{{ 'si' if r.usuario.en_linea else 'no' }}">
+            <div style="position:relative;width:52px;margin:0 auto 8px;">
+              {% if r.usuario.foto and r.usuario.foto != 'default.png' %}
+              <img class="foto-recomendado" src="{{ url_for('static', filename=r.usuario.foto) }}" style="margin:0;">
+              {% else %}
+              <div class="foto-recomendado" style="margin:0;">{{ r.usuario.usuario_publico[:2]|upper }}</div>
+              {% endif %}
+              <span class="punto-estado {{ 'activo' if r.estado == 'Activo' else '' }}" style="right:0;bottom:0;"></span>
+            </div>
+            <div class="nombre-recomendado">{{ r.usuario.usuario_publico }}</div>
+            <div class="estado-historial" data-usuario="{{ r.usuario.id }}" style="font-size:.75em;color:var(--color-texto-suave);">{{ r.estado or '' }}</div>
+            <button class="btn" style="width:100%;margin-top:8px;font-size:.82em;padding:7px;" onclick="enviarSolicitud({{ r.usuario.id }}, this)"><i class="bi bi-person-plus"></i> Agregar</button>
+          </div>
+          {% endfor %}
+        </div>
+        <button class="btn-flecha-carrusel" onclick="document.getElementById('carrusel-recomendados').scrollBy({left:200, behavior:'smooth'})"><i class="bi bi-chevron-right"></i></button>
+      </div>
+      {% endif %}
+
+      <div class="banner-consejo" id="banner-consejo">
+        <i class="bi bi-lightbulb"></i>
+        <span>Consejo: Sé respetuoso y mantén conversaciones positivas.</span>
+        <button onclick="cerrarConsejo()"><i class="bi bi-x"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel-solicitudes" id="panel-solicitudes">
+  <h2 style="margin-bottom:16px;">Solicitudes</h2>
+  {% if not solicitudes %}
+    <p style="color:var(--color-texto-suave);font-size:.9em;">No tienes solicitudes pendientes.</p>
+  {% endif %}
+  {% for s in solicitudes %}
+  <div class="solicitud-item" data-id="{{ s.id }}">
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="resultado-usuario" style="padding:0;border:none;flex:1;">
+        {% if s.emisor.foto and s.emisor.foto != 'default.png' %}
+        <img class="foto" src="{{ url_for('static', filename=s.emisor.foto) }}">
+        {% else %}
+        <div class="foto">{{ s.emisor.usuario_publico[:2]|upper }}</div>
+        {% endif %}
+        <div>
+          <div class="nombre">{{ s.emisor.usuario_publico }}</div>
+          <div style="font-size:.8em;color:var(--color-texto-suave);">{{ s.emisor.descripcion or "Sin descripción" }}</div>
+        </div>
+      </div>
+    </div>
+    {% if s.emisor.intereses %}
+    <p style="font-size:.8em;color:var(--color-texto-suave);margin-top:6px;">Le interesa: {{ s.emisor.intereses }}</p>
+    {% endif %}
+    <div class="acciones">
+      <button class="btn" onclick="responder({{ s.id }}, 'aceptar', this)"><i class="bi bi-check-lg"></i> Aceptar</button>
+      <button class="btn btn-secundario" onclick="responder({{ s.id }}, 'rechazar', this)"><i class="bi bi-x-lg"></i> Rechazar</button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function togglePanel() {
+  document.getElementById('panel-solicitudes').classList.toggle('abierto');
+}
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('panel-solicitudes');
+  const boton = e.target.closest('[onclick="togglePanel()"]');
+  if (panel.classList.contains('abierto') && !panel.contains(e.target) && !boton) {
+    panel.classList.remove('abierto');
+  }
+});
+{% if request.args.get('abrir') == 'solicitudes' %}
+document.addEventListener('DOMContentLoaded', () => document.getElementById('panel-solicitudes').classList.add('abierto'));
+{% endif %}
+
+function actualizarBadge() {
+  const cantidad = document.querySelectorAll('.solicitud-item').length;
+  const badge = document.getElementById('badge-solicitudes');
+  badge.innerHTML = cantidad > 0 ? `<span class="badge-contador">${cantidad}</span>` : '';
+}
+
+function cerrarTodosLosMenus() { document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('abierto')); }
+document.addEventListener('click', cerrarTodosLosMenus);
+function toggleFiltros(e) {
+  e.stopPropagation();
+  const estaAbierto = document.getElementById('menu-filtros').classList.contains('abierto');
+  cerrarTodosLosMenus();
+  if (!estaAbierto) document.getElementById('menu-filtros').classList.add('abierto');
+}
+function aplicarFiltro(tipo) {
+  document.querySelectorAll('.tarjeta-recomendado').forEach(t => {
+    t.style.display = (tipo === 'en-linea' && t.dataset.enLinea !== 'si') ? 'none' : '';
+  });
+  cerrarTodosLosMenus();
+}
+
+function cerrarConsejo() {
+  document.getElementById('banner-consejo').style.display = 'none';
+  localStorage.setItem('messechat-consejo-cerrado', '1');
+}
+if (localStorage.getItem('messechat-consejo-cerrado') === '1') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const b = document.getElementById('banner-consejo');
+    if (b) b.style.display = 'none';
+  });
+}
+
+// ---------- Tiempo real: nuevas solicitudes y estado ----------
+const socket = io();
+socket.on('connect', () => socket.emit('unirse_personal'));
+
+socket.on('estado_usuario', (data) => {
+  document.querySelectorAll(`.estado-historial[data-usuario="${data.usuario_id}"]`).forEach(el => {
+    el.textContent = data.estado || '';
+  });
+  const tarjeta = document.querySelector(`.tarjeta-recomendado[data-usuario="${data.usuario_id}"]`);
+  if (tarjeta) tarjeta.dataset.enLinea = (data.estado === 'Activo') ? 'si' : 'no';
+});
+
+socket.on('nueva_solicitud', (s) => {
+  const vacio = document.querySelector('#panel-solicitudes p');
+  if (vacio) vacio.remove();
+
+  const foto = (s.foto && s.foto !== 'default.png')
+    ? `<img class="foto" src="/static/${s.foto}">`
+    : `<div class="foto">${s.usuario_publico.slice(0,2).toUpperCase()}</div>`;
+
+  const div = document.createElement('div');
+  div.className = 'solicitud-item';
+  div.dataset.id = s.solicitud_id;
+  div.innerHTML = `
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="resultado-usuario" style="padding:0;border:none;flex:1;">
+        ${foto}
+        <div>
+          <div class="nombre">${s.usuario_publico}</div>
+          <div style="font-size:.8em;color:var(--color-texto-suave);">${s.descripcion || 'Sin descripción'}</div>
+        </div>
+      </div>
+    </div>
+    ${s.intereses ? `<p style="font-size:.8em;color:var(--color-texto-suave);margin-top:6px;">Le interesa: ${s.intereses}</p>` : ''}
+    <div class="acciones">
+      <button class="btn" onclick="responder(${s.solicitud_id}, 'aceptar', this)"><i class="bi bi-check-lg"></i> Aceptar</button>
+      <button class="btn btn-secundario" onclick="responder(${s.solicitud_id}, 'rechazar', this)"><i class="bi bi-x-lg"></i> Rechazar</button>
+    </div>`;
+  document.getElementById('panel-solicitudes').appendChild(div);
+  actualizarBadge();
+  document.getElementById('panel-solicitudes').classList.add('abierto');
+});
+
+const input = document.getElementById('input-buscar');
+const contenedor = document.getElementById('resultados-busqueda');
+
+input.addEventListener('input', async () => {
+  const q = input.value.trim();
+  const relleno = document.getElementById('contenido-relleno');
+  if (!q) { contenedor.innerHTML = ''; relleno.style.display = ''; return; }
+  relleno.style.display = 'none';
+  const res = await fetch(`/api/buscar-usuarios?q=${encodeURIComponent(q)}`);
+  const usuarios = await res.json();
+  contenedor.innerHTML = usuarios.map(u => {
+    let boton;
+    if (u.estado === 'aceptada') boton = `<a class="btn btn-secundario" href="/chat"><i class="bi bi-chat-dots"></i> Ir al chat</a>`;
+    else if (u.estado === 'pendiente') boton = `<button class="btn btn-secundario" disabled><i class="bi bi-clock"></i> Solicitud enviada</button>`;
+    else boton = `<button class="btn" onclick="enviarSolicitud(${u.id}, this)"><i class="bi bi-person-plus"></i> Enviar solicitud</button>`;
+    const foto = (u.foto && u.foto !== 'default.png')
+      ? `<img class="foto" src="/static/${u.foto}">`
+      : `<div class="foto">${u.usuario_publico.slice(0,2).toUpperCase()}</div>`;
+    return `<div class="resultado-usuario">
+      ${foto}
+      <div class="nombre">${u.usuario_publico}</div>
+      ${boton}
+    </div>`;
+  }).join('') || '<p style="padding:14px;color:var(--color-texto-suave);"><i class="bi bi-emoji-frown"></i> No se encontraron usuarios.</p>';
+});
+
+async function enviarSolicitud(id, btn) {
+  const res = await fetch(`/api/solicitud/enviar/${id}`, { method: 'POST' });
+  const data = await res.json();
+  if (data.ok) {
+    btn.outerHTML = '<button class="btn btn-secundario" disabled>Solicitud enviada</button>';
+  } else {
+    alert(data.mensaje);
+  }
+}
+
+async function responder(id, accion, btn) {
+  const res = await fetch(`/api/solicitud/${id}/${accion}`, { method: 'POST' });
+  const data = await res.json();
+  if (data.ok) {
+    btn.closest('.solicitud-item').remove();
+    actualizarBadge();
+  }
+}
+</script>
+{% endblock %}

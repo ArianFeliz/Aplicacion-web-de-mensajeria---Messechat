@@ -1,0 +1,49 @@
+{# Espera una variable 'activo' con el nombre de la sección actual: inicio, chats, solicitudes, bloqueados, perfil, configuracion #}
+<div class="sidebar">
+  <div>
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('main.inicio') }}" class="{{ 'activo' if activo == 'inicio' }}"><i class="bi bi-house-door"></i> Inicio</a>
+      <a href="{{ url_for('chat.ver_chat') }}" class="{{ 'activo' if activo == 'chats' }}"><i class="bi bi-chat-dots"></i> Chats</a>
+      <a href="{{ url_for('main.inicio', abrir='solicitudes') }}" class="{{ 'activo' if activo == 'solicitudes' }}">
+        <i class="bi bi-bell"></i> Solicitudes
+        {% if solicitudes_pendientes %}<span class="badge-contador">{{ solicitudes_pendientes }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('main.bloqueados') }}" class="{{ 'activo' if activo == 'bloqueados' }}"><i class="bi bi-slash-circle"></i> Bloqueados</a>
+      <a href="{{ url_for('main.perfil') }}" class="{{ 'activo' if activo == 'perfil' }}"><i class="bi bi-person-circle"></i> Perfil</a>
+      <a href="{{ url_for('main.configuracion') }}" class="{{ 'activo' if activo == 'configuracion' }}"><i class="bi bi-gear"></i> Configuración</a>
+      <a href="{{ url_for('auth.logout') }}" onclick="return confirm('¿Seguro que quieres cerrar sesión?')"><i class="bi bi-box-arrow-right"></i> Salir</a>
+    </nav>
+  </div>
+
+  <div>
+    <div class="switch-tema">
+      <i class="bi bi-sun-fill"></i>
+      <label class="interruptor">
+        <input type="checkbox" id="toggle-tema" onchange="cambiarTema()">
+        <span></span>
+      </label>
+      <i class="bi bi-moon-fill"></i>
+    </div>
+
+    <div class="tarjeta-tip">
+      <i class="bi bi-chat-heart"></i>
+      <p><strong>¡Conecta fácilmente!</strong><br>Encuentra nuevas personas y empieza una conversación.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function cambiarTema() {
+  const activado = document.getElementById('toggle-tema').checked;
+  document.documentElement.setAttribute('data-theme', activado ? 'dark' : 'light');
+  localStorage.setItem('messechat-tema', activado ? 'dark' : 'light');
+}
+(function () {
+  const guardado = localStorage.getItem('messechat-tema');
+  if (guardado === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    const chk = document.getElementById('toggle-tema');
+    if (chk) chk.checked = true;
+  }
+})();
+</script>

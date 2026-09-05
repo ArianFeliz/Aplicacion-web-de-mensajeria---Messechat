@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block titulo %}Crear cuenta · MesseChat{% endblock %}
+{% block contenido %}
+<div class="pantalla-centrada">
+  <form class="tarjeta" method="POST" id="form-registro" style="width:400px;">
+    <h1>Crear cuenta</h1>
+    <p class="subtitulo">Paso 1 de 4 · Correo y contraseña</p>
+    <div class="campo">
+      <label>Correo</label>
+      <input type="email" name="correo" required>
+    </div>
+    <div class="campo">
+      <label>Contraseña</label>
+      <input type="password" name="contrasena" id="contrasena" minlength="8" required
+             oninput="validarContrasena()">
+      <p style="font-size:.76em;color:var(--color-texto-suave);margin-top:5px;">
+        Mínimo 8 caracteres, con letras y números.
+      </p>
+    </div>
+    <div class="campo">
+      <label>Confirmar contraseña</label>
+      <input type="password" name="confirmar_contrasena" id="confirmar_contrasena" minlength="8" required
+             oninput="validarContrasena()">
+      <p id="error-confirmacion" style="font-size:.76em;color:#d9483c;margin-top:5px;display:none;">
+        Las contraseñas no coinciden.
+      </p>
+    </div>
+
+    <div class="campo" style="display:flex;align-items:flex-start;gap:8px;">
+      <input type="checkbox" name="acepta_terminos" id="acepta_terminos" required style="width:16px;height:16px;margin-top:2px;">
+      <label for="acepta_terminos" style="font-weight:400;font-size:.85em;">
+        Acepto los <a href="#" onclick="event.preventDefault(); abrirModal('modal-terminos')" style="color:var(--color-primario);">Términos de Uso</a>
+        y la <a href="#" onclick="event.preventDefault(); abrirModal('modal-privacidad')" style="color:var(--color-primario);">Política de Privacidad</a>.
+      </label>
+    </div>
+
+    <button class="btn" style="width:100%;" type="submit">Continuar</button>
+    <div class="enlaces-alternos">
+      <a href="{{ url_for('auth.inicio_seccion') }}">Volver</a>
+      <a href="{{ url_for('auth.login') }}">Ya tengo cuenta</a>
+    </div>
+  </form>
+</div>
+
+<div class="modal-fondo" id="modal-terminos" onclick="if(event.target===this) cerrarModal('modal-terminos')">
+  <div class="modal-caja" style="width:420px;max-height:70vh;overflow-y:auto;">
+    <h2 style="margin-bottom:10px;">Términos de Uso</h2>
+    <p style="font-size:.85em;color:var(--color-texto-suave);line-height:1.6;">
+      Este es un texto de ejemplo (placeholder) para fines de desarrollo. Antes de publicar MesseChat
+      para usuarios reales, deberías reemplazar este contenido con Términos de Uso redactados o
+      revisados por un abogado, que cubran temas como: edad mínima para usar la app, conducta
+      permitida, contenido prohibido, propiedad de los mensajes, causas de suspensión de cuentas,
+      y jurisdicción aplicable.
+    </p>
+    <button class="btn btn-secundario" style="width:100%;margin-top:16px;" onclick="cerrarModal('modal-terminos')">Cerrar</button>
+  </div>
+</div>
+
+<div class="modal-fondo" id="modal-privacidad" onclick="if(event.target===this) cerrarModal('modal-privacidad')">
+  <div class="modal-caja" style="width:420px;max-height:70vh;overflow-y:auto;">
+    <h2 style="margin-bottom:10px;">Política de Privacidad</h2>
+    <p style="font-size:.85em;color:var(--color-texto-suave);line-height:1.6;">
+      Este es un texto de ejemplo (placeholder) para fines de desarrollo. Antes de publicar MesseChat
+      para usuarios reales, deberías reemplazar este contenido con una Política de Privacidad real que
+      explique qué datos se recopilan (correo, foto, mensajes, intereses), cómo se almacenan y protegen,
+      con quién se comparten (si aplica), y cómo un usuario puede solicitar que se eliminen sus datos.
+    </p>
+    <button class="btn btn-secundario" style="width:100%;margin-top:16px;" onclick="cerrarModal('modal-privacidad')">Cerrar</button>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function abrirModal(id) { document.getElementById(id).classList.add('abierto'); }
+function cerrarModal(id) { document.getElementById(id).classList.remove('abierto'); }
+
+function validarContrasena() {
+  const c1 = document.getElementById('contrasena').value;
+  const c2 = document.getElementById('confirmar_contrasena').value;
+  const error = document.getElementById('error-confirmacion');
+  const coincide = c2 === '' || c1 === c2;
+  error.style.display = coincide ? 'none' : 'block';
+  document.getElementById('confirmar_contrasena').setCustomValidity(coincide ? '' : 'no coincide');
+}
+</script>
+{% endblock %}

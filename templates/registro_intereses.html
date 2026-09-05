@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}Gustos e intereses · MesseChat{% endblock %}
+{% block contenido %}
+<div class="pantalla-centrada">
+  <form class="tarjeta" method="POST">
+    <h1>Gustos e intereses</h1>
+    <p class="subtitulo">Paso 4 de 4 · Sepáralos con comas</p>
+    <div class="campo">
+      <input type="text" name="intereses" placeholder="música, videojuegos, cine...">
+    </div>
+    <button class="btn" style="width:100%;" type="submit">Finalizar y entrar</button>
+  </form>
+</div>
+{% endblock %}
