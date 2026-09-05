@@ -48,4 +48,7 @@ app = crear_app()
 if __name__ == "__main__":
     # eventlet/gevent recomendado en producción; el server de desarrollo
     # de Flask-SocketIO alcanza para probar localmente.
-    socketio.run(app, debug=True, port=5000, use_reloader=False, allow_unsafe_werkzeug=True)
+    puerto = int(os.environ.get("PORT", 5000))
+    modo_debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    socketio.run(app, host="0.0.0.0", port=puerto, debug=modo_debug,
+                 use_reloader=False, allow_unsafe_werkzeug=True)
