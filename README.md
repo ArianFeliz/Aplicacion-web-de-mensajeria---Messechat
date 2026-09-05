@@ -2,32 +2,7 @@
 
 App web de mensajería en tiempo real hecha con **Flask + Flask-SocketIO** y base de datos **PostgreSQL en Neon**.
 
-## 1. Instalar dependencias
-
-```
-python -m venv venv
-venv\Scripts\activate        # en Windows
-source venv/bin/activate     # en Mac/Linux
-
-pip install -r requirements.txt
-```
-
-## 2. Configurar la base de datos
-
-1. Crea un proyecto gratis en https://neon.tech
-2. Copia la cadena de conexión ("Connection string")
-3. Copia `.env.example` y renómbralo a `.env`
-4. Pega tu cadena de conexión en `DATABASE_URL` y pon cualquier texto largo en `SECRET_KEY`
-
-> Si no configuras `.env`, la app usa un archivo local `messechat.db` (SQLite) para poder probarla sin Neon.
-
-## 3. Ejecutar la app
-
-```
-python app.py
-```
-
-Abre **http://localhost:5000**
+Prueba la Demo aqui: https://aplicacion-web-de-mensajeria-messechat.onrender.com/
 
 ## Funciones incluidas
 
@@ -41,13 +16,6 @@ Abre **http://localhost:5000**
 - Inicio con buscador general, historial de conversaciones (con mensajes no leídos), y personas recomendadas
 - Configuración: paleta de colores, tamaño y tipo de letra, modo claro/oscuro
 - Diseño con barra lateral consistente en toda la app
-
-## Pendiente / ideas para seguir mejorando
-
-- Migrar de SQLite a Neon en un ambiente de producción real
-- Verificación de correo al registrarse
-- Notificaciones push del navegador
-- Reemplazar los textos de Términos/Privacidad por unos reales (revisados por un abogado) antes de un lanzamiento público
 
 ## Estructura del proyecto
 
