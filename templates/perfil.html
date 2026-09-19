@@ -22,7 +22,7 @@
   <div class="opcion-config" style="text-align:center;">
     <label for="input-foto" style="cursor:pointer;display:inline-block;position:relative;">
       {% if current_user.foto and current_user.foto != 'default.png' %}
-        <img id="preview-foto" src="{{ url_for('static', filename=current_user.foto) }}"
+        <img id="preview-foto" src="{{ current_user.foto }}"
              style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--color-primario);">
       {% else %}
         <div id="preview-foto-vacio" style="width:96px;height:96px;border-radius:50%;background:var(--color-primario);

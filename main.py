@@ -1,6 +1,6 @@
 import os
-from werkzeug.utils import secure_filename
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify, current_app
+import base64
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy import or_, and_
 from extensions import db, socketio
@@ -28,10 +28,10 @@ def perfil():
 
         archivo = request.files.get("foto")
         if archivo and archivo.filename and _extension_valida(archivo.filename):
-            os.makedirs(current_app.config["UPLOAD_FOLDER"], exist_ok=True)
-            nombre = secure_filename(f"user{current_user.id}_{archivo.filename}")
-            archivo.save(os.path.join(current_app.config["UPLOAD_FOLDER"], nombre))
-            current_user.foto = f"uploads/{nombre}"
+            extension = archivo.filename.rsplit(".", 1)[1].lower()
+            mime = "jpeg" if extension == "jpg" else extension
+            datos = base64.b64encode(archivo.read()).decode("utf-8")
+            current_user.foto = f"data:image/{mime};base64,{datos}"
 
         db.session.commit()
         return redirect(url_for("main.perfil"))

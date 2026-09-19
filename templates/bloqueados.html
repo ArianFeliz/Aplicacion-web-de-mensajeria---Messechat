@@ -27,7 +27,7 @@
   {% for b in bloqueos %}
   <div class="resultado-usuario" style="background:var(--superficie);border-radius:12px;margin-bottom:8px;" data-id="{{ b.bloqueado_id }}">
     {% if b.bloqueado.foto and b.bloqueado.foto != 'default.png' %}
-    <img class="foto" src="{{ url_for('static', filename=b.bloqueado.foto) }}">
+    <img class="foto" src="{{ b.bloqueado.foto }}">
     {% else %}
     <div class="foto">{{ b.bloqueado.usuario_publico[:2]|upper }}</div>
     {% endif %}

@@ -12,7 +12,7 @@
     </a>
     <a href="{{ url_for('main.perfil') }}" title="Mi perfil">
       {% if current_user.foto and current_user.foto != 'default.png' %}
-      <img src="{{ url_for('static', filename=current_user.foto) }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+      <img src="{{ current_user.foto }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
       {% else %}
       <span style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:600;">{{ current_user.usuario_publico[:2]|upper }}</span>
       {% endif %}
@@ -35,7 +35,7 @@
       <a class="contacto-item {% if chat_activo and chat_activo.id == c.id %}activo{% endif %}"
          href="{{ url_for('chat.ver_chat', chat_id=c.id) }}" data-nombre="{{ otro.usuario_publico|lower }}">
         {% if otro.foto and otro.foto != 'default.png' %}
-        <img class="foto" src="{{ url_for('static', filename=otro.foto) }}">
+        <img class="foto" src="{{ otro.foto }}">
         {% else %}
         <div class="foto">{{ otro.usuario_publico[:2]|upper }}</div>
         {% endif %}
@@ -147,7 +147,7 @@ async function verPerfilContacto(id) {
   const res = await fetch(`/api/usuario/${id}`);
   const u = await res.json();
   const foto = (u.foto && u.foto !== 'default.png')
-    ? `<img src="/static/${u.foto}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`
+    ? `<img src="${u.foto}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">`
     : `<div style="width:80px;height:80px;border-radius:50%;background:var(--color-primario);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.6em;font-weight:600;">${u.usuario_publico.slice(0,2).toUpperCase()}</div>`;
   document.getElementById('modal-perfil-contenido').innerHTML = `
     <div style="text-align:center;">

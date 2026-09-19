@@ -11,7 +11,7 @@ class Usuario(UserMixin, db.Model):
     contrasena_hash = db.Column(db.String(255), nullable=False)
 
     usuario_publico = db.Column(db.String(50), unique=True, nullable=False)
-    foto = db.Column(db.String(255), default="default.png")
+    foto = db.Column(db.Text, default=None)  # data URI base64, ej. "data:image/png;base64,..."
     descripcion = db.Column(db.String(300), default="")
     intereses = db.Column(db.String(300), default="")  # separados por coma
     pais = db.Column(db.String(60), default="")  # ej. "🇩🇴 República Dominicana"

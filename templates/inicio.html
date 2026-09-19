@@ -13,7 +13,7 @@
     </button>
     <a href="{{ url_for('main.perfil') }}" title="Mi perfil">
       {% if current_user.foto and current_user.foto != 'default.png' %}
-      <img src="{{ url_for('static', filename=current_user.foto) }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+      <img src="{{ current_user.foto }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
       {% else %}
       <span style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-weight:600;">{{ current_user.usuario_publico[:2]|upper }}</span>
       {% endif %}
@@ -30,7 +30,7 @@
     <div class="bienvenida">
       <div style="position:relative;">
         {% if current_user.foto and current_user.foto != 'default.png' %}
-        <img class="foto-grande" src="{{ url_for('static', filename=current_user.foto) }}">
+        <img class="foto-grande" src="{{ current_user.foto }}">
         {% else %}
         <div class="foto-grande">{{ current_user.usuario_publico[:2]|upper }}</div>
         {% endif %}
@@ -76,7 +76,7 @@
           <a href="{{ url_for('chat.ver_chat', chat_id=h.chat_id) }}" class="resultado-usuario" style="text-decoration:none;color:inherit;">
             <div style="position:relative;flex-shrink:0;">
               {% if h.otro.foto and h.otro.foto != 'default.png' %}
-              <img class="foto" src="{{ url_for('static', filename=h.otro.foto) }}">
+              <img class="foto" src="{{ h.otro.foto }}">
               {% else %}
               <div class="foto">{{ h.otro.usuario_publico[:2]|upper }}</div>
               {% endif %}
@@ -109,7 +109,7 @@
           <div class="tarjeta-recomendado" data-usuario="{{ r.usuario.id }}" data-en-linea="{{ 'si' if r.usuario.en_linea else 'no' }}">
             <div style="position:relative;width:52px;margin:0 auto 8px;">
               {% if r.usuario.foto and r.usuario.foto != 'default.png' %}
-              <img class="foto-recomendado" src="{{ url_for('static', filename=r.usuario.foto) }}" style="margin:0;">
+              <img class="foto-recomendado" src="{{ r.usuario.foto }}" style="margin:0;">
               {% else %}
               <div class="foto-recomendado" style="margin:0;">{{ r.usuario.usuario_publico[:2]|upper }}</div>
               {% endif %}
@@ -144,7 +144,7 @@
     <div style="display:flex;gap:10px;align-items:center;">
       <div class="resultado-usuario" style="padding:0;border:none;flex:1;">
         {% if s.emisor.foto and s.emisor.foto != 'default.png' %}
-        <img class="foto" src="{{ url_for('static', filename=s.emisor.foto) }}">
+        <img class="foto" src="{{ s.emisor.foto }}">
         {% else %}
         <div class="foto">{{ s.emisor.usuario_publico[:2]|upper }}</div>
         {% endif %}
@@ -232,7 +232,7 @@ socket.on('nueva_solicitud', (s) => {
   if (vacio) vacio.remove();
 
   const foto = (s.foto && s.foto !== 'default.png')
-    ? `<img class="foto" src="/static/${s.foto}">`
+    ? `<img class="foto" src="${s.foto}">`
     : `<div class="foto">${s.usuario_publico.slice(0,2).toUpperCase()}</div>`;
 
   const div = document.createElement('div');
@@ -274,7 +274,7 @@ input.addEventListener('input', async () => {
     else if (u.estado === 'pendiente') boton = `<button class="btn btn-secundario" disabled><i class="bi bi-clock"></i> Solicitud enviada</button>`;
     else boton = `<button class="btn" onclick="enviarSolicitud(${u.id}, this)"><i class="bi bi-person-plus"></i> Enviar solicitud</button>`;
     const foto = (u.foto && u.foto !== 'default.png')
-      ? `<img class="foto" src="/static/${u.foto}">`
+      ? `<img class="foto" src="${u.foto}">`
       : `<div class="foto">${u.usuario_publico.slice(0,2).toUpperCase()}</div>`;
     return `<div class="resultado-usuario">
       ${foto}
