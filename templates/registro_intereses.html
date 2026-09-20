@@ -1,11 +1,18 @@
 {% extends "base.html" %}
 {% block titulo %}Gustos e intereses · MesseChat{% endblock %}
 {% block contenido %}
-<div class="pantalla-centrada">
-  <form class="tarjeta" method="POST">
+<div class="pantalla-centrada fondo-auth">
+  <i class="bi bi-chat-heart-fill icono-flotante-auth i1"></i>
+  <i class="bi bi-send-fill icono-flotante-auth i2"></i>
+  <i class="bi bi-emoji-smile-fill icono-flotante-auth i3"></i>
+  <i class="bi bi-chat-dots-fill icono-flotante-auth i4"></i>
+
+  <form class="tarjeta tarjeta-auth" method="POST">
+    <div class="logo-auth"><i class="bi bi-stars"></i></div>
     <h1>Gustos e intereses</h1>
     <p class="subtitulo">Paso 4 de 4 · Sepáralos con comas</p>
-    <div class="campo">
+    <div class="campo campo-icono">
+      <i class="bi bi-heart-fill"></i>
       <input type="text" name="intereses" placeholder="música, videojuegos, cine...">
     </div>
     <button class="btn" style="width:100%;" type="submit">Finalizar y entrar</button>

@@ -166,13 +166,13 @@ function cerrarModalPerfil() {
 }
 
 async function vaciarChat(chatId) {
-  if (!confirm('¿Vaciar todos los mensajes de este chat? Esto no se puede deshacer.')) return;
+  if (!(await confirmarAccion('¿Vaciar todos los mensajes de este chat? Esto no se puede deshacer.'))) return;
   const res = await fetch(`/api/chat/${chatId}/vaciar`, { method: 'POST' });
   if ((await res.json()).ok) location.reload();
 }
 
 async function bloquearContacto(id) {
-  if (!confirm('¿Bloquear a este usuario? Ya no podrán chatear ni enviarse solicitudes.')) return;
+  if (!(await confirmarAccion('¿Bloquear a este usuario? Ya no podrán chatear ni enviarse solicitudes.'))) return;
   const res = await fetch(`/api/bloquear/${id}`, { method: 'POST' });
   if ((await res.json()).ok) window.location.href = '/inicio';
 }

@@ -20,11 +20,64 @@
 <body {% if current_user.is_authenticated and current_user.preferencia %}data-tamano="{{ current_user.preferencia.tamano_letra }}"{% endif %}>
   {% with mensajes = get_flashed_messages() %}
     {% if mensajes %}
-      <div class="flash" style="max-width:380px;margin:14px auto 0;">{{ mensajes[0] }}</div>
+      <div class="flash-toast" id="flash-toast">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span>{{ mensajes[0] }}</span>
+        <button type="button" onclick="cerrarFlash()" aria-label="Cerrar">&times;</button>
+      </div>
     {% endif %}
   {% endwith %}
   {% block contenido %}{% endblock %}
+
+  <div class="modal-fondo" id="modal-confirmacion">
+    <div class="modal-caja" style="width:340px;text-align:center;">
+      <div class="icono-alerta"><i class="bi bi-exclamation-triangle-fill"></i></div>
+      <p id="texto-confirmacion" style="margin-bottom:18px;"></p>
+      <div style="display:flex;gap:10px;">
+        <button type="button" class="btn btn-secundario" style="flex:1;" id="btn-cancelar-confirmacion">Cancelar</button>
+        <button type="button" class="btn btn-peligro" style="flex:1;" id="btn-aceptar-confirmacion">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+    function cerrarFlash() {
+      const toast = document.getElementById('flash-toast');
+      if (!toast) return;
+      toast.classList.add('saliendo');
+      setTimeout(() => toast.remove(), 250);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      if (document.getElementById('flash-toast')) setTimeout(cerrarFlash, 4000);
+    });
+
+    function confirmarAccion(mensaje) {
+      return new Promise((resolve) => {
+        document.getElementById('texto-confirmacion').textContent = mensaje;
+        const modal = document.getElementById('modal-confirmacion');
+        const btnOk = document.getElementById('btn-aceptar-confirmacion');
+        const btnCancel = document.getElementById('btn-cancelar-confirmacion');
+        modal.classList.add('abierto');
+        function limpiar(resultado) {
+          modal.classList.remove('abierto');
+          btnOk.removeEventListener('click', onOk);
+          btnCancel.removeEventListener('click', onCancel);
+          resolve(resultado);
+        }
+        function onOk() { limpiar(true); }
+        function onCancel() { limpiar(false); }
+        btnOk.addEventListener('click', onOk);
+        btnCancel.addEventListener('click', onCancel);
+      });
+    }
+
+    function cerrarSesion() {
+      confirmarAccion('¿Seguro que quieres cerrar sesión?').then((ok) => {
+        if (ok) window.location.href = "{{ url_for('auth.logout') }}";
+      });
+    }
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -11,7 +11,7 @@
       <a href="{{ url_for('main.bloqueados') }}" class="{{ 'activo' if activo == 'bloqueados' }}"><i class="bi bi-slash-circle"></i> Bloqueados</a>
       <a href="{{ url_for('main.perfil') }}" class="{{ 'activo' if activo == 'perfil' }}"><i class="bi bi-person-circle"></i> Perfil</a>
       <a href="{{ url_for('main.configuracion') }}" class="{{ 'activo' if activo == 'configuracion' }}"><i class="bi bi-gear"></i> Configuración</a>
-      <a href="{{ url_for('auth.logout') }}" onclick="return confirm('¿Seguro que quieres cerrar sesión?')"><i class="bi bi-box-arrow-right"></i> Salir</a>
+      <a href="#" onclick="event.preventDefault(); cerrarSesion()"><i class="bi bi-box-arrow-right"></i> Salir</a>
     </nav>
   </div>
 

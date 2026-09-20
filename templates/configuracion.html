@@ -77,7 +77,7 @@ function previsualizar() {
 }
 
 async function restablecer() {
-  if (!confirm('¿Seguro que quieres restablecer los valores originales?')) return;
+  if (!(await confirmarAccion('¿Seguro que quieres restablecer los valores originales?'))) return;
   const res = await fetch('/api/configuracion/restablecer', { method: 'POST' });
   if ((await res.json()).ok) location.reload();
 }

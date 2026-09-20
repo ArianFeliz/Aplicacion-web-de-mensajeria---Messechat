@@ -1,25 +1,31 @@
 {% extends "base.html" %}
 {% block titulo %}Crear cuenta · MesseChat{% endblock %}
 {% block contenido %}
-<div class="pantalla-centrada">
-  <form class="tarjeta" method="POST" id="form-registro" style="width:400px;">
+<div class="pantalla-centrada fondo-auth">
+  <i class="bi bi-chat-heart-fill icono-flotante-auth i1"></i>
+  <i class="bi bi-send-fill icono-flotante-auth i2"></i>
+  <i class="bi bi-emoji-smile-fill icono-flotante-auth i3"></i>
+  <i class="bi bi-chat-dots-fill icono-flotante-auth i4"></i>
+
+  <form class="tarjeta tarjeta-auth" method="POST" id="form-registro" style="width:400px;">
+    <div class="logo-auth"><i class="bi bi-chat-dots-fill"></i></div>
     <h1>Crear cuenta</h1>
     <p class="subtitulo">Paso 1 de 4 · Correo y contraseña</p>
-    <div class="campo">
-      <label>Correo</label>
-      <input type="email" name="correo" required>
+    <div class="campo campo-icono">
+      <i class="bi bi-envelope-fill"></i>
+      <input type="email" name="correo" placeholder="Correo" required>
     </div>
-    <div class="campo">
-      <label>Contraseña</label>
-      <input type="password" name="contrasena" id="contrasena" minlength="8" required
+    <div class="campo campo-icono">
+      <i class="bi bi-lock-fill"></i>
+      <input type="password" name="contrasena" id="contrasena" placeholder="Contraseña" minlength="8" required
              oninput="validarContrasena()">
       <p style="font-size:.76em;color:var(--color-texto-suave);margin-top:5px;">
         Mínimo 8 caracteres, con letras y números.
       </p>
     </div>
-    <div class="campo">
-      <label>Confirmar contraseña</label>
-      <input type="password" name="confirmar_contrasena" id="confirmar_contrasena" minlength="8" required
+    <div class="campo campo-icono">
+      <i class="bi bi-lock-fill"></i>
+      <input type="password" name="confirmar_contrasena" id="confirmar_contrasena" placeholder="Confirmar contraseña" minlength="8" required
              oninput="validarContrasena()">
       <p id="error-confirmacion" style="font-size:.76em;color:#d9483c;margin-top:5px;display:none;">
         Las contraseñas no coinciden.

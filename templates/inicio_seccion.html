@@ -1,8 +1,14 @@
 {% extends "base.html" %}
 {% block titulo %}MesseChat{% endblock %}
 {% block contenido %}
-<div class="pantalla-centrada">
-  <div class="tarjeta" style="text-align:center;">
+<div class="pantalla-centrada fondo-auth">
+  <i class="bi bi-chat-heart-fill icono-flotante-auth i1"></i>
+  <i class="bi bi-send-fill icono-flotante-auth i2"></i>
+  <i class="bi bi-emoji-smile-fill icono-flotante-auth i3"></i>
+  <i class="bi bi-chat-dots-fill icono-flotante-auth i4"></i>
+
+  <div class="tarjeta tarjeta-auth" style="text-align:center;">
+    <div class="logo-auth"><i class="bi bi-chat-dots-fill"></i></div>
     <h1>MesseChat</h1>
     <p class="subtitulo">Mensajería en tiempo real</p>
     <a class="btn" style="display:block;margin-bottom:12px;text-decoration:none;" href="{{ url_for('auth.registro_credenciales') }}">Crear cuenta</a>
