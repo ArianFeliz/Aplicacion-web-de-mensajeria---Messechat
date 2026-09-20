@@ -116,7 +116,11 @@
               <span class="punto-estado {{ 'activo' if r.estado == 'Activo' else '' }}" style="right:0;bottom:0;"></span>
             </div>
             <div class="nombre-recomendado">{{ r.usuario.usuario_publico }}</div>
+            {% if r.razon %}
+            <div class="razon-recomendado" title="{{ r.razon }}">{{ r.razon }}</div>
+            {% else %}
             <div class="estado-historial" data-usuario="{{ r.usuario.id }}" style="font-size:.75em;color:var(--color-texto-suave);">{{ r.estado or '' }}</div>
+            {% endif %}
             <button class="btn" style="width:100%;margin-top:8px;font-size:.82em;padding:7px;" onclick="enviarSolicitud({{ r.usuario.id }}, this)"><i class="bi bi-person-plus"></i> Agregar</button>
           </div>
           {% endfor %}

@@ -16,6 +16,12 @@ def _extension_valida(nombre_archivo):
     return "." in nombre_archivo and nombre_archivo.rsplit(".", 1)[1].lower() in EXTENSIONES_VALIDAS
 
 
+def _intereses_set(texto):
+    if not texto:
+        return set()
+    return {t.strip().lower() for t in texto.split(",") if t.strip()}
+
+
 # ---------- Perfil ----------
 
 @main_bp.route("/perfil", methods=["GET", "POST"])
@@ -48,6 +54,7 @@ def inicio():
 
     from models import Chat, Mensaje
     from estado import calcular_estado
+    import random
 
     todos_los_chats = Chat.query.filter(
         or_(Chat.usuario1_id == current_user.id, Chat.usuario2_id == current_user.id)
@@ -74,8 +81,38 @@ def inicio():
     me_bloquearon_ids = {b.usuario_id for b in Bloqueo.query.filter_by(bloqueado_id=current_user.id).all()}
     excluir = conectados_ids | bloqueados_ids | me_bloquearon_ids | {current_user.id}
 
-    candidatos = Usuario.query.filter(~Usuario.id.in_(excluir)).order_by(db.func.random()).limit(8).all()
-    recomendados = [{"usuario": u, "estado": calcular_estado(u)} for u in candidatos]
+    candidatos_todos = Usuario.query.filter(~Usuario.id.in_(excluir)).all()
+
+    mis_intereses = _intereses_set(current_user.intereses)
+    mi_pais = (current_user.pais or "").strip()
+
+    con_puntaje = []
+    for u in candidatos_todos:
+        comunes = sorted(_intereses_set(u.intereses) & mis_intereses)
+        mismo_pais = bool(mi_pais) and u.pais == mi_pais
+        puntos = (3 if mismo_pais else 0) + len(comunes)
+
+        razon = None
+        if mismo_pais and comunes:
+            razon = f"Mismo país · les gusta {comunes[0]}"
+        elif mismo_pais:
+            razon = "Mismo país"
+        elif comunes:
+            razon = f"Le gusta {comunes[0]}"
+
+        con_puntaje.append({"usuario": u, "puntos": puntos, "razon": razon})
+
+    relevantes = [c for c in con_puntaje if c["puntos"] > 0]
+    relevantes.sort(key=lambda c: c["puntos"], reverse=True)
+
+    resto = [c for c in con_puntaje if c["puntos"] == 0]
+    random.shuffle(resto)
+
+    seleccionados = (relevantes + resto)[:8]
+    recomendados = [
+        {"usuario": c["usuario"], "estado": calcular_estado(c["usuario"]), "razon": c["razon"]}
+        for c in seleccionados
+    ]
 
     return render_template("inicio.html", solicitudes=solicitudes, historial=historial,
                             recomendados=recomendados)
